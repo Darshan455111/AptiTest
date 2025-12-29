@@ -4,11 +4,7 @@
     <meta charset="UTF-8">
     <title>Test Result</title>
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
         body {
@@ -17,77 +13,119 @@
             font-family: 'Segoe UI', sans-serif;
         }
 
-        .result-card {
+        .summary-card {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            animation: scaleIn 0.8s ease;
-            transition: transform 0.3s ease;
         }
 
-        .result-card:hover {
-            transform: translateY(-8px);
+        .review-card {
+            background: #ffffff;
+            border-radius: 16px;
         }
 
-        .score-circle {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            font-weight: bold;
-            margin: 0 auto 20px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        .correct {
+            background-color: #d4edda;
+            border-left: 5px solid #28a745;
+            border-radius: 8px;
         }
 
-        .retry-btn {
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border: none;
-            border-radius: 50px;
-            transition: transform 0.3s ease;
-        }
-
-        .retry-btn:hover {
-            transform: scale(1.08);
-        }
-
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
+        .wrong {
+            background-color: #f8d7da;
+            border-left: 5px solid #dc3545;
+            border-radius: 8px;
         }
     </style>
 </head>
 
 <body>
 
-<div class="container d-flex justify-content-center align-items-center" style="min-height:100vh;">
-    <div class="card result-card shadow-lg p-5 text-center" style="max-width:420px; width:100%;">
+<div class="container py-5">
 
-        <i class="bi bi-trophy-fill text-warning mb-3" style="font-size:4rem;"></i>
+    <!-- SUMMARY -->
+    <div class="card summary-card shadow p-4 mb-4 text-center">
+        <h2 class="text-success fw-bold">✅ Test Completed</h2>
+        <h4>Your Score: <b>{{ score }}</b> / {{ total }}</h4>
 
-        <h2 class="fw-bold text-success mb-2">Test Completed!</h2>
-        <p class="text-muted">Your performance summary</p>
-
-        <div class="score-circle">
-            {{ score }}/{{ total }}
-        </div>
-
-        <div class="progress mb-3" style="height:18px;">
+        <div class="progress mt-3" style="height:20px;">
             <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
                  style="width: {{ percentage }}%;">
                 {{ percentage }}%
             </div>
         </div>
+    </div>
 
-        <a href="/" class="btn retry-btn text-white btn-lg mt-3">
-            <i class="bi bi-arrow-repeat"></i> Retake Test
-        </a>
+    <!-- TOGGLE BUTTON -->
+    <div class="text-center mb-4">
+        <button class="btn btn-warning btn-lg"
+                onclick="toggleReview()"
+                id="reviewBtn">
+            📘 Show Answer Review
+        </button>
+    </div>
+
+    <!-- ANSWER REVIEW -->
+    <div id="answerReview" style="display:none;">
+
+        <h3 class="text-white mb-3">📖 Answer Review</h3>
+
+        {% for item in review_data %}
+        <div class="card review-card shadow mb-4 p-3">
+
+            <h5 class="fw-bold">
+                Q{{ forloop.counter }}. {{ item.question.question_text }}
+            </h5>
+
+            {% for opt in item.options %}
+            <div class="p-2 mt-2
+                {% if opt.id == item.correct_option_id %}
+                    correct
+                {% elif opt.id == item.selected_option_id %}
+                    wrong
+                {% endif %}
+            ">
+                {{ opt.option_text }}
+
+                {% if opt.id == item.correct_option_id %}
+                    <span class="badge bg-success ms-2">Correct</span>
+                {% elif opt.id == item.selected_option_id %}
+                    <span class="badge bg-danger ms-2">Your Answer</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            {% if item.question.explanation %}
+            <div class="alert alert-info mt-3">
+                <b>Explanation:</b> {{ item.question.explanation }}
+            </div>
+            {% endif %}
+
+        </div>
+        {% endfor %}
 
     </div>
+
+    <div class="text-center mt-4">
+        <a href="/" class="btn btn-light btn-lg rounded-pill">
+            🔁 Retake Test
+        </a>
+    </div>
+
 </div>
+
+<script>
+    function toggleReview() {
+        const review = document.getElementById("answerReview");
+        const btn = document.getElementById("reviewBtn");
+
+        if (review.style.display === "none") {
+            review.style.display = "block";
+            btn.innerText = "❌ Hide Answer Review";
+        } else {
+            review.style.display = "none";
+            btn.innerText = "📘 Show Answer Review";
+        }
+    }
+</script>
 
 </body>
 </html>
